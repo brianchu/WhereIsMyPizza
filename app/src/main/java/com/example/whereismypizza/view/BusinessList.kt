@@ -28,20 +28,20 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.whereismypizza.model.Business
 import com.example.whereismypizza.model.Category
 import com.example.whereismypizza.model.Coordinate
 import com.example.whereismypizza.model.Location
-import com.example.whereismypizza.model.Business
 import com.example.whereismypizza.viewmodel.RestaurantViewModel
 import com.example.whereismypizza.viewmodel.State
 
 
 @Composable
 fun BusinessList(modifier: Modifier = Modifier) {
-    val viewModel: RestaurantViewModel = viewModel()
+    val viewModel: RestaurantViewModel = hiltViewModel()
     val state = viewModel.state.collectAsStateWithLifecycle()
 
     Column(

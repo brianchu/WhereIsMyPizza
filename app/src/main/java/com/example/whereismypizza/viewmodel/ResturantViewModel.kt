@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.whereismypizza.BuildConfig
 import com.example.whereismypizza.model.Business
 import com.example.whereismypizza.model.api.ApiService
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * State object flowing around between View and View Model.
@@ -24,7 +27,10 @@ sealed class State() {
 /**
  * Restaurant View Model encapsulate the handling of data and allowing View to observe the data changes.
  */
-class RestaurantViewModel : ViewModel() {
+@HiltViewModel
+class RestaurantViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
     private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()
 
@@ -32,12 +38,17 @@ class RestaurantViewModel : ViewModel() {
         fetch()
     }
 
-    private fun fetch() {
-        viewModelScope.launch(Dispatchers.IO) {
+    /**
+     * Fetches the data in parallel and combine them into one
+     * Reason why we have dispatcher passing in because testing dispatcher IO fail to sync
+     * so need to be flexible.
+     */
+    fun fetch(dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             try {
                 // Make 2 requests in parallel
                 val beer = async {
-                    ApiService.api.getRestaurant(
+                    apiService.api.getRestaurant(
                         authorization = BuildConfig.YELP_KEY,
                         searchTerm = BEER,
                         location = LOCATION
@@ -45,7 +56,7 @@ class RestaurantViewModel : ViewModel() {
                 }
 
                 val pizza = async {
-                    ApiService.api.getRestaurant(
+                    apiService.api.getRestaurant(
                         authorization = BuildConfig.YELP_KEY,
                         searchTerm = PIZZA,
                         location = LOCATION
@@ -63,6 +74,7 @@ class RestaurantViewModel : ViewModel() {
     }
 
     companion object {
+        // Note this is hardcoded for this test only, ideally it should be input from the View
         private const val PIZZA = "pizza"
         private const val BEER = "beer"
         private const val LOCATION = "111 Shutter, San Francisco, CA"
