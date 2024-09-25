@@ -14,7 +14,7 @@ android {
     val apiProperties = Properties()
     apiProperties.load(FileInputStream(propertiesFiles))
 
-    namespace = "com.example.demoapp"
+    namespace = "com.example.whereismypizza"
     compileSdk = 34
 
     defaultConfig {
@@ -60,6 +60,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.okhttp.logging.interceptor)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
